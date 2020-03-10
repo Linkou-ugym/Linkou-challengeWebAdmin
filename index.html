@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+
+<!--challengeWebAdmin 是借用 couponWebAdmin 的架構，所以程式中沿用 coupon 作為 challenge -->
+
+<head>
+  <meta charset="utf-8" />
+  <title>uGym Challenge</title>
+
+  <link rel="stylesheet" href="css/main.css">
+
+  <script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
+
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  
+  <script src="https://code.jquery.com/jquery-1.12.3.min.js"></script>
+  
+  <script src="js/jquery.loading.js"></script>
+  
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" />
+  <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+
+  <link rel="stylesheet" href="css/loading.css" />
+  <script src="js/loading.js"></script>
+
+</head>
+
+<body >
+  <!--  for test-->
+  
+<!--
+  <button class="btn-red" onclick="window.location.href = '1-addMember.html';">FOR TEST ONLY!!!!!</button>
+  <button onclick="myFunctionA()">SignIn A</button>
+  <button onclick="myFunctionB()">SignIn B</button>
+
+  <button onclick="myFunction()">UserID</button>
+  <button onclick="myFunctionR()">Read Database</button>
+
+  <button onclick="myFunctionW()">Write Database</button>
+
+  <button onclick="myFunctionSignOut()">SignOut</button>
+-->
+
+  <!--  end of for test -->
+  
+  <!--  **** 標頭 ****-->
+  <div>
+    <button class="btn-blue" id="challengeMangementBtn" onclick="challengeManage()" style="float: right; margin-right: 10px" disabled="disabled" ><i class="fa fa-flag"></i>&nbsp 挑戰賽抽獎</button>   
+    <button class="btn-blue" id="memberMangementBtn" onclick="memberManage()" style="float: right; margin-right: 10px" disabled="disabled" ><i class="fa fa-user"></i>&nbsp 客戶管理</button>
+    <button class="btn-blue" id="logToggle" onclick="logInAndOut()" style="float: right; margin-right: 10px; margin-left: 0px"><i class="fa fa-sign-in"></i>&nbsp 登入</button>
+    <button id="loginStatus" class="btn-blue" style="float: right; background-color: white; color: gray">請登入來寫入資料庫</button>
+
+<!--    <h1 id="titleHeader">林口運動中心 - 挑戰賽管理</h1>-->
+    <h1 id="titleHeader">挑戰賽管理</h1> 
+  </div>
+  <hr>
+  <!--  **** 標頭:結束 ****-->
+  
+  <!--  **** 進行中挑戰賽的畫面 **** ?? 應該可以包成一個大 DIV，方便 hide() 和 show()?? -->
+  <h2 id="inProgress">挑戰賽</h2>
+  <button class="btn-blue" id="addCouponBtn" onclick="addCoupon()"><i class="fa fa-plus"></i>&nbsp 新增挑戰賽</button>
+
+  <button class="btn-red" id="refreshBtn" onclick="readFromDB()" style="margin-left: 20px"><i class="fa fa-refresh"></i>&nbsp 刷新挑戰賽</button>
+
+  <table id="couponTable" class="display">
+    <thead>
+      <tr id="table-header">
+        <th style="width: 100px">挑戰賽編號</th>
+        <th>挑戰賽名稱</th>
+        <th style="width: 100px">挑戰賽開始</th>
+        <th style="width: 100px">挑戰賽結束</th>
+        <th style="width: 150px">操作</th>
+      </tr>
+    </thead>
+  </table>
+  <!--  **** 進行中挑戰賽的畫面:結束 **** -->
+  
+  <!--  **** 挑戰賽歷史的畫面 **** ?? 應該可以包成一個大 DIV，方便 hide() 和 show()?? -->  
+  <div id="spacerBetweenTables" style="height: 100px; text-align: ">
+    <div style="height: 50px"></div>
+    <hr>
+    <h2>挑戰賽歷史紀錄</h2>
+  </div>
+
+  <table id="couponHistoryTable" class="display" style="width:100%;">
+    <thead>
+      <tr id="table-header">
+        <th style="width: 100px">挑戰賽編號</th>
+        <th>挑戰賽名稱</th>
+        <th style="width: 100px">挑戰賽開始</th>
+        <th style="width: 100px">挑戰賽結束</th>
+        <th style="width: 150px">操作</th>
+      </tr>
+    </thead>
+  </table>
+  <!--  **** 挑戰賽歷史的畫面:結束 **** -->
+
+  <!--  **** 新增挑戰賽的畫面，包成一個大 DIV，方便 hide() 和 show() **** -->
+  <div id="addCoupon" style="height: 600px; font-family:'Noto Sans TC'">
+    <h2 id="couponNumber" value="00">新增挑戰賽 - T0000</h2>
+<!--    <button class="btn-blue" onclick="addNewCoach()" style="margin-bottom: 0">查詢/新增 老師</button>-->
+    <div style="font-size: 20px;">
+      <div class="couponLabel">挑戰賽名稱</div> <input id="couponName" class="couponInput" type="text" placeholder="請輸入挑戰賽名稱">
+      <br>     
+      <div class="couponLabel">挑戰賽開始</div> 
+      <span><input id="couponDateStart" class="couponInput" type="date" ></span>
+      <br> 
+      <div class="couponLabel">挑戰賽結束</div> 
+      <span><input id="couponDateEnd" class="couponInput" type="date" > </span>
+      <br>  
+             
+      <div class="couponLabel">挑戰賽說明</div><textarea cols="39" rows="5" id="挑戰賽內容" style="margin-left: 9px; padding-left: 13px; font-size: 20px; font-family: 'Noto Sans TC'" placeholder="請說明挑戰賽內容，規則，獎品，收費以及獎勵方式
+      "></textarea><br>    
+
+      <div class="couponLabel">挑戰賽費用</div> <input id="couponFee" class="couponInput" type="text" placeholder="請輸入挑戰賽費用，0 表示免費"><br>
+                                                          
+      <div class="couponLabel">其他說明</div> <input id="couponOtherDesc" class="couponInput" type="text" placeholder="請輸入其他說明"><br>
+
+      <div class="couponLabel">兌換條件</div> <input id="coupon兌換條件" class="couponInput" type="text" style="width: 200px" placeholder="例如: 10">公里以上<br> 
+
+      <div class="couponLabel">獎品數量</div> <input id="coupon獎品數量" class="couponInput" type="text" style="width: 200px" placeholder="例如: 10">個<br>                     
+      <br>
+      <button class="btn-blue" onclick="couponConfirm()">確定</button>
+      <button class="btn-red" onclick="couponCancel()">取消</button>
+<!--      
+      <span style="margin-left: 150px">重複</span>
+      <input id="repeatN" class="couponInput" style="width: 50px; text-align: right; padding-right: 10px;" type="text" value="1" placeholder="重複幾週">
+      週(張)
+-->
+      <br>
+    </div>       
+  </div>
+  <!--  **** 新增挑戰賽的畫面:結束 **** -->
+  
+
+  <!--  **** 挑戰賽細節的畫面，可以更新挑戰賽資料，參加及確認 **** -->
+  <div id="couponDetailDiv" style="height: 600px; font-family:'Noto Sans TC'">
+    <button class="btn-blue" onclick="backToHome()" style="float: left"><i class="fa fa-arrow-left"></i>&nbsp 回到 挑戰賽管理</button>
+    <h2 id="couponNumberDetail" style="margin-left: 200px" value="00">挑戰賽頁面</h2>
+    <div ><br>
+      <div class="couponLabelDetail">挑戰賽名稱</div> <input id="couponDetail" class="couponInputDetail" type="text" placeholder="請輸入挑戰賽名稱"><br>
+
+      <div class="couponLabelDetail">挑戰賽開始</div> 
+      <span><input id="couponDateStartDetail" class="couponInputDetail" type="date"></span>
+      <br>
+
+      <div class="couponLabelDetail">挑戰賽結束</div> 
+      <span><input id="couponDateEndDetail" class="couponInputDetail" type="date"></span>
+      <br>
+ 
+      <div class="couponLabelDetail">挑戰賽說明</div><textarea cols="48" rows="5" id="挑戰賽內容Detail" style="margin-left: 6px; padding-left: 2px; font-size: 16px; font-family: 'Noto Sans TC'"></textarea>
+      <br>                     
+      
+      <div class="couponLabelDetail">挑戰賽費用</div> <input id="couponFeeDetail" class="couponInputDetail" type="text"><br>
+                           
+      <div class="couponLabelDetail">其他說明</div> <input id="couponOtherDescDetail" class="couponInputDetail" type="text"><br>
+
+      <div class="couponLabelDetail">其他說明</div> <input id="coupon兌換條件Detail" class="couponInputDetail" type="text" style="width: 200px" placeholder="例如: 10">公里以上<br>
+           
+      <div class="couponLabelDetail">其他說明</div> <input id="coupon獎品數量Detail" class="couponInputDetail" type="text" style="width: 200px" placeholder="例如: 10">個<br>
+                 
+      <br>
+
+      <button class="btn-blue" onclick="backToHome()"><i class="fa fa-arrow-left"></i>&nbsp 回到 挑戰賽管理</button>
+      <button class="btn-red" onclick="couponUpdate()">更新 挑戰賽資料</button>
+      <br>
+     <hr>
+      <table id="couponMemberTable" class="display" style="width:100%;font-family:'Noto Sans TC'">
+        <thead>
+          <tr id="table-header">
+            <th>客戶姓名</th>
+            <th>電話號碼</th>            
+            <th>參加</th>
+            <th>繳費</th>
+            <th style="width:  200px;">操作</th>
+          </tr>
+        </thead>
+      </table>
+    </div> 
+  </div>    
+  <!--  **** 挑戰賽細節的畫面:結束 **** -->
+  
+  <!--  **** 以上 HTML 畫面設計結束，但 datatables 必須靠 js/main-page.js 來完成。以下是 Javascript codes **** -->
+     
+  <!-- Insert these scripts at the bottom of the HTML, but before you use any Firebase services -->
+  <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/7.5.2/firebase-app.js"></script>
+
+  <!-- If you enabled Analytics in your project, add the Firebase SDK for Analytics -->
+  <!--  analytic 功能先不用-->
+  <!--  <script src="https://www.gstatic.com/firebasejs/7.5.2/firebase-analytics.js"></script>-->
+
+  <!-- Add Firebase products that you want to use -->
+  <script src="https://www.gstatic.com/firebasejs/7.5.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.5.2/firebase-database.js"></script>
+  
+  <!--  firestore 功能先不用-->
+  <!--  <script src="https://www.gstatic.com/firebasejs/7.5.2/firebase-firestore.js"></script>-->
+
+
+  <!-- 我們的 Firebase Operations 放在 js/firebase-ops.js -->
+  <script src="js/firebase-ops.js"></script>
+
+  <script>
+    //   資料格式
+    //    var memberData = [
+    //      ["謝小憲", "Jacky",   "男", "1966-01-01", "09XXXXXXXX", "A1XXXXXXXX", "台北市"],
+    //      ["許小琦", "Chantal", "女", "1966-02-02", "09XXXXXXXX", "A1XXXXXXXX", "竹北市"],   
+    //      ["盧小宏", "Tony",    "男", "1966-03-03", "09XXXXXXXX", "A1XXXXXXXX", "新竹市"],   
+    //    ];
+    //
+    //    var couponMember =[
+    //      ["U0001", ["謝小憲", "已繳費", "已簽到"], ["許小琦", "未繳費", "未簽到"]],
+    //      ["U0002", ["許小琦", "已繳費", "未簽到"], ["謝小憲", "已繳費", "未簽到"]],   
+    //      ["U0003", ["盧小宏", "未繳費", "未簽到"], ["謝小憲", "已繳費", "未簽到"]],           
+    //    ];
+    //
+    //    var couponMemberSet = [
+    //      ["謝東憲", "Jacky", "09XXXXXXXX", "A1XXXXXXXX", "台北市總統府", "YES", "NO"],
+    //    ];
+    //
+    //    [ID, Name, Coach, date/time, Calories, Max.Persons, Assist, Fee, OtherDesc]
+//        var couponData = [
+//          ["C0002", "Inbody 100 元挑戰賽", "2020-02-28", "原價 350元"],
+//          ["C0003", "乳清蛋白 100 元挑戰賽", "2020-02-28", "原價 400元"],
+//        ];
+//    
+//        var couponHistory = [
+//          ["C0001", "Inbody 100 元挑戰賽", "2020-01-01", "原價 350元"],
+//        ];    
+    //    var coachSet = [
+    //      ["Jack", "男", "高大帥"],
+    //      ["Chantal", "女", "愛跑馬拉松"],
+    //    ];  
+    
+    // 全域變數，偷懶用，容易產生麻煩的 bugs
+    var couponData = [];
+    var couponHistory = [];
+    var couponMemberSet = [];
+    var coachSet = [];
+    var memberData = [];
+    var couponNumber;
+
+    // 從 Firebase 資料庫取得 couponData, couponHistory, memberData, couponMember, coachSet, 
+    // 定義在 js/firebase-ops.js 中
+    readFromDB();
+
+  </script>      
+
+  <!-- Main page init，初始化 datatables-->
+  <script src="js/main-page.js"></script>
+
+  <!-- 我們的 Functions-->
+  <script src="js/functions.js"></script>      
+
+  <!--  **** MAIN ***-->
+  <script type="text/javascript">
+    var couponNum = 0; // Update from Database
+    var inaddCoupon = false;
+    var version = " V1.1";
+
+//    $("#titleHeader").text("林口運動中心 - 挑戰賽管理"+version);
+    $("#titleHeader").text("挑戰賽管理"+version);    
+
+
+    $(document).ready(function() {
+      initMainPage(); // 在 js/main-page.js  
+
+    });
+  </script>
+
+
+    <script>        
+      // ========= 以下為方便  debug 的函式
+
+      var i = 0;
+
+      function myFunctionA() {
+        firebase.auth().signInWithEmailAndPassword("aaa@test.com", "aaaaaa").catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          document.getElementById("loader").innerHTML = "Login Error";
+        });
+      }
+
+      function myFunctionB() {
+        firebase.auth().signInWithEmailAndPassword("bbb@test.com", "bbbbbb").catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          document.getElementById("loader").innerHTML = "Login Error";
+        });
+      }
+
+      function myFunction() {
+//          var user = firebase.auth().currentUser;
+//          console.log(user.uid);
+
+      }
+
+      function myFunctionSignOut() {
+        firebase.auth().signOut();
+        console.log("logout");
+      }
+
+      function myFunctionR() {
+        console.log("Read Database");
+
+        var aaa = firebase.database().ref('users/林口運動中心/挑戰賽/').once('value').then(function(snapshot) {
+          console.log("done");
+          var bbb = snapshot.val();
+          console.log(bbb);
+          console.log(JSON.parse(bbb.現在挑戰賽));
+          couponData = JSON.parse(bbb.現在挑戰賽);
+        });
+
+      }
+
+
+      function myFunctionW() {
+
+        try {
+          var userId = firebase.auth().currentUser.uid;
+        } catch (e) {
+          alert("Please login first!");
+          return 0;
+        }
+
+        var couponData =[
+          ["T0002", "一個月跑步機路程挑戰賽", "2020-01-01", "2020-01-31", "獎品:乳清一瓶", "測試使用"],
+          ["T0003", "一個月跑步機路程挑戰賽", "2020-02-01", "2020-02-28", "獎品:乳清一瓶", "測試使用"],
+        ];
+        
+        var couponHistory =[
+          ["T0001", "三個月跑步機路程挑戰賽", "2019-10-01", "2019-12-31", "獎品:乳清一瓶", "測試使用"],
+        ];
+        
+        database.ref('users/林口運動中心/挑戰賽').set({
+          現在挑戰賽: JSON.stringify(couponData),
+          過去挑戰賽: JSON.stringify(couponHistory),          
+        });
+           
+        var couponMember =[
+          ["T0001", ["小白", "2019-10-11 已參加", "2019-10-12 已繳費", "U002", "09XXXXX222"], ["小華", "2019-10-13 已參加", "2019-10-13 已繳費", "U003", "09XXXXX333"]],   
+          ["T0002", ["小白", "2020-01-05 已參加", "2019-01-05 已繳費", "U002", "09XXXXX222"], ["小華", "2020-01-04 已參加", "2020-01-04 已繳費", "U003", "09XXXXX333"]], 
+           ["T0003", ["小白", "2020-01-06 已參加", "未繳費", "U002", "09XXXXX222"], ["小華", "2020-01-11 已參加", "未繳費", "U003", "09XXXXX333"]], 
+        ];          
+        
+        database.ref('users/林口運動中心/挑戰賽管理').set({
+          挑戰賽會員: JSON.stringify(couponMember),
+        });
+
+
+        i++;
+
+      }
+
+      function aaaFunction() {
+        console.log("aaa");
+        //$("#centerCell").css('background-color', 'red');
+        $("#aaa").css({
+          "background-color": "yellow",
+          "font-size": "200%"
+        });
+        $("#aaa").html('Save');
+      }
+
+
+
+      function cccFunction() {
+        console.log("ccc");
+
+        $("#couponTable").hide();
+        $("#addCoupon").show();
+      }
+    </script>
+
+</body>
+
+</html>

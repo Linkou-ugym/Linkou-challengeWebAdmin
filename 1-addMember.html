@@ -1,0 +1,878 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>uGym 客戶管理</title>
+
+  <link rel="stylesheet" href="css/main.css">
+
+  <script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
+
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" />
+  <script src="https://code.jquery.com/jquery-1.12.3.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+
+
+  <link rel="stylesheet" href="css/loading.css" />
+  <script src="js/loading.js"></script>
+</head>
+
+<body>
+
+  <!--  ==================== 客戶列表 (HTML)=============================-->
+  <div id="memberDiv">
+    <h1>客戶管理</h1>
+    <hr>
+    <button class="btn-blue" id="closeMemberBtn" onclick="window.location.href = 'index.html';"><i class="fa fa-arrow-left"></i>&nbsp 回主畫面</button>
+    <button class="btn-blue" id="addMemberBtn" onclick="addMember()"><i class="fa fa-plus"></i>&nbsp 新增客戶</button>
+
+    <button class="btn-red" id="refreshMemberBtn" onclick="readMemberfromDB()" style="margin-left: 20px"><i class="fa fa-refresh"></i>&nbsp 刷新客戶</button>
+
+    <table id="memberTable" class="display" style="font-family: 'Noto Sans TC';width: 100% ">
+      <thead>
+        <tr id="table-header">
+          <th style="width: 80px">姓名</th>
+<!--          <th style="width: 80px">LINE ID</th>-->
+          <th style="width: 50px">性別</th>
+          <th style="width: 100px">生日</th>
+          <th style="width: 50px">電話</th>
+          <th style="width: 80px">身分字號</th>
+          <th>地址</th>
+          <th style="width: 250px">操作</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+  <!--  ==================== END: 客戶列表 (HTML)=============================-->
+
+  <!--  ==================== 新增客戶 (HTML)=============================-->
+  <div id="addMemberInfo" style=" font-family:'Noto Sans TC'">
+    <h2 value="00">新增客戶</h2>
+    <hr>
+    <div style="font-size: 20px;">
+      <div class="couponLabel">客戶姓名</div> <input id="newMemberName" class="couponInput" type="text" placeholder="請輸入客戶姓名"><br>
+      <div class="couponLabel">LINE Id</div> <input id="newMemberLINEId" class="couponInput" type="text" placeholder="請輸入LINE ID"><br>
+      <div class="couponLabel">性別</div>
+      <select id="newMemberGender" class="couponInput" name="newMemberGender" style="width: 413px;height: 38px">
+        <option value="男">男</option>
+        <option value="女">女</option>
+        <option value="其他">其他</option>
+        <option value="不透漏">不透漏</option>
+      </select><br>
+
+      <div class="couponLabel">生日</div> <input id="newMemberBirth" class="couponInput" type="text" placeholder="請輸入生日，例如 2019-01-01"><br>
+
+      <div class="couponLabel">電話</div> <input id="newMemberPhoneNum" class="couponInput" type="text" placeholder="請輸入電話"><br>
+
+      <div class="couponLabel">身分字號</div> <input id="newMemberIdNum" class="couponInput" type="text" placeholder="請輸入客戶身分字號"><br>
+
+      <div class="couponLabel">地址</div> <input id="newMemberAssress" class="couponInput" type="text" placeholder="請輸入客戶地址"><br>
+      <button class="btn-blue" onclick="addMemberInfo()">確定</button>
+      <button class="btn-red" onclick="closeAddMember()">取消</button>
+    </div>
+  </div>
+  <!--  ==================== END: 新增客戶 (HTML)=============================-->
+
+  <!--  ==================== 客戶已參加挑戰賽 (HTML)========================-->
+  <div id="myCouponDiv">
+    <h1 id="客戶已參加挑戰賽">已參加挑戰賽</h1>
+    <hr>
+    <div id="myCoupons">
+      <button class="btn-blue" id="backBtn" onclick="closeMyCoupons()">返回</button>
+
+      <table id="usedCouponsTable" class="display" style="font-family: 'Noto Sans TC';width: 100%">
+        <thead>
+          <tr id="table-header">
+            <th style="width: 120px">挑戰賽編號</th>
+            <th>挑戰賽內容</th>
+            <th style="width: 100px">挑戰賽開始</th>
+            <th style="width: 100px">挑戰賽結束</th>            
+            <th style="width: 50px">操作</th>
+          </tr>
+        </thead>
+      </table>
+      <div style="height: 100px"></div>
+      <hr>
+      <table id="myCouponsHistory" class="display" style="font-family: 'Noto Sans TC';width: 100% ">
+        <thead>
+          <tr id="table-header">
+            <th style="width: 120px">歷史挑戰賽</th>
+            <th>挑戰賽名稱</th>
+            <th style="width: 100px">挑戰賽開始</th>
+            <th style="width: 100px">挑戰賽結束</th>
+            <th style="width: 50px">操作</th>
+          </tr>
+        </thead>
+      </table>
+
+    </div>
+  </div>
+  <!--  ==================== 客戶已參加挑戰賽 (HTML)========================-->
+
+
+  <!--  ==================== 可參加挑戰賽 (HTML)=============================-->
+  <div id="couponDiv">
+    <h1 id="可參加挑戰賽">可參加挑戰賽編號</h1>
+    <hr>
+    <div id="coupons">
+      <button class="btn-blue" id="returnBtn" onclick="returnFromCoupons()">返回</button>
+
+      <table id="notUsedCouponTable" class="display" style="font-family: 'Noto Sans TC';width: 100%">
+        <thead>
+          <tr id="table-header">
+            <th style="width: 120px">可參加挑戰賽</th>
+            <th>挑戰賽內容</th>
+            <th style="width: 100px">挑戰賽開始</th>
+            <th style="width: 100px">挑戰賽結束</th>
+            <th style="width: 50px">操作</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </div>
+  <!--  ==================== 可參加挑戰賽 (HTML)=============================-->
+
+
+  <!-- Insert these scripts at the bottom of the HTML, but before you use any Firebase services -->
+
+  <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/7.5.2/firebase-app.js"></script>
+
+  <!-- If you enabled Analytics in your project, add the Firebase SDK for Analytics -->
+  <script src="https://www.gstatic.com/firebasejs/7.5.2/firebase-analytics.js"></script>
+
+  <!-- Add Firebase products that you want to use -->
+  <script src="https://www.gstatic.com/firebasejs/7.5.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.5.2/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.5.2/firebase-firestore.js"></script>
+
+
+  <script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+      apiKey: "AIzaSyBG5upiimduLJVmIqZR4t23EzToDSHG8MU",
+      authDomain: "linkou-sports-center.firebaseapp.com",
+      databaseURL: "https://linkou-sports-center.firebaseio.com",
+      projectId: "linkou-sports-center",
+      storageBucket: "linkou-sports-center.appspot.com",
+      messagingSenderId: "264935412201",
+      appId: "1:264935412201:web:0df2e52e8abf05bcd8bb78",
+      measurementId: "G-J5CX6DQ7XC"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+
+    var database = firebase.database();
+
+    var isLogin = false;
+    var memberData = [];
+    var memberLineId =[];
+    var myCouponsData = [];
+    var myCouponsHistory = [];
+    var couponData = [];
+    var couponHistory = [];
+    var notInCoupons=[];
+    var username;
+    var useLineId;
+    
+    var userForAddingCoupon;
+    var userForCancelCoupon;
+    var userPhoneNumberForCancelCoupon;
+    var userPhoneNumberForUsingCoupon;
+
+    // Monitoring AuthState
+    firebase.auth().onAuthStateChanged(function(user) {
+      console.log(user);
+
+      if (user == null) {
+        // not login
+        console.log("no login");
+        $("#loginStatus").text("請登入來寫入資料庫");
+        $("#logToggle").text("登入");
+        isLogin = false;
+      } else {
+        // login
+        console.log(user.email);
+        $("#loginStatus").text("Hello " + user.email);
+        $("#logToggle").text("登出");
+        isLogin = true;
+      }
+    });
+
+    var readTimes = 0;
+    var toRead = 3;
+
+    firebase.database().ref('users/林口運動中心/挑戰賽').once('value').then(function(snapshot) {
+      console.log("data read done");
+      readTimes++;
+      var result = snapshot.val();
+      couponData = JSON.parse(result.現在挑戰賽);
+      couponHistory = JSON.parse(result.過去挑戰賽);
+      buildCouponsTable();
+      if (readTimes == toRead) {
+        $.loading.end();
+      }
+    });
+
+    $.loading.start('Loading data');
+    firebase.database().ref('users/林口運動中心/挑戰賽管理').once('value').then(function(snapshot) {
+      console.log("class read done");
+      readTimes++;
+      var result = snapshot.val();
+      couponMember = JSON.parse(result.挑戰賽會員);
+      if (readTimes == toRead) $.loading.end();
+    });
+
+    // Read memberData from the database
+    firebase.database().ref('users/林口運動中心/客戶管理').once('value').then(function(snapshot) {
+      console.log("member read done");
+      readTimes++;
+      var result = snapshot.val();
+      memberData = JSON.parse(result.會員資料);
+      
+      // 轉換 userId，從 33字元長度 "Uaabb....ccdd" ==> 顯示 "Uaabb..ccdd"
+//      memberLineId=[];
+//      memberData.forEach(function(member, index, array){
+//        memberLineId.push(member[1]);
+//        var head, tail;
+//        head=member[1].slice(0,5);
+//        tail=member[1].slice(29,33)
+//        //console.log(head+".."+tail);
+//        member[1]=head.toUpperCase()+".."+tail.toUpperCase();
+//      });
+      
+      buildMemberTable();      
+      if (readTimes == toRead) {
+        $.loading.end();
+      }
+    });
+    
+    buildUsedCouponsTable();
+    //buildCouponsTable();
+    $("#addMemberInfo").hide();
+    $("#myCouponDiv").hide();
+    $("#couponDiv").hide();    
+
+    //======== Functions ===================//
+
+    function buildMemberTable() {
+      var memberTable = $('#memberTable').DataTable({
+        data: memberData,
+        pageLength: 10,
+        lengthChange: false,
+        deferRender: true,
+        columns: [{ //title: 姓名
+            className: "centerCell"
+          },
+//          {
+//            //title: LINE ID
+//            className: "centerCell"
+//          },
+          { //title: "姓別"
+            className: "centerCell"
+          },
+          {
+            //title: "年紀"
+            className: "centerCell"
+          },
+          {
+            //title: "電話"
+            className: "centerCell"
+          },
+          {
+            //title: "身分字號"
+            className: "centerCell"
+          },
+          {
+            //title: "地址", 不對中，對左
+
+          },
+          {
+            //title: "操作",
+            data: null,
+            defaultContent: "<button class = 'checkUsedCoupons to-edit' style='width: 100px'>已參加挑戰賽</button> " +
+              "<button class = 'checkNewCoupons to-edit' style='width: 100px'>參加挑戰賽</button> " +
+              "<button class = 'memberDeleteBtn to-delete'>刪除</button>"
+          }
+        ]
+      });
+
+      $("#memberTable_filter").css("font-family", "Noto Sans TC");
+      $("#memberTable_info").css("font-family", "Noto Sans TC");
+      $("#memberTable_paginate").css("font-family", "Noto Sans TC");
+
+      // ============ Function for checkUsedCoupons ==================================================
+      $('#memberTable tbody').on('click', '.checkUsedCoupons', function() {
+        console.log("checkUsedCoupons is clicked");
+
+        $("#myCouponDiv").show();
+        $("#memberDiv").hide();
+
+
+        var data = memberTable.row($(this).parents('tr')).data();
+        userName = data[0];
+        var userPhoneNumber = data[3];
+        
+        // 取消課程用
+        userForCancelCoupon = data[0];
+        userPhoneNumberForCancelCoupon = data[3];
+
+        $("#客戶已參加挑戰賽").text(data[0] + " - 已參加挑戰賽");
+
+        var myCouponsNumbers = [];
+        couponMember.forEach(function(item, index, array) {
+          //console.log(item[1][0]);
+          var itemLength = item.length;
+          for (var i = 0; i < itemLength; i++) {
+            //console.log(i, item[i][0]);
+            if (item[i][4] == userPhoneNumber) {
+              myCouponsNumbers.push(item[0]);
+            };
+          }
+        });
+
+        console.log(myCouponsNumbers);
+
+        myCouponsData = [];
+        couponData.forEach(function(coupon, index, array) {
+          //console.log(coupon);
+
+          myCouponsNumbers.forEach(function(attended, index, array) {
+            if (attended == coupon[0]) {
+              //console.log("match", attended);
+              myCouponsData.push(coupon);
+            }
+          });
+        });
+        
+      
+        myCouponsHistory = [];
+        couponHistory.forEach(function(coupon, index, array) {
+          //console.log(coupon);
+
+          myCouponsNumbers.forEach(function(attended, index, array) {
+            if (attended == coupon[0]) {
+              //console.log("match", attended);
+              myCouponsHistory.push(coupon);
+            }
+          });
+        });
+
+
+        var table = $('#usedCouponsTable').DataTable();
+        table.clear();
+        table.rows.add(myCouponsData);
+        table.draw();
+
+        var table = $('#myCouponsHistory').DataTable();
+        table.clear();
+        table.rows.add(myCouponsHistory);
+        table.draw();
+
+      });
+
+      // ============ Function for checkNewCoupons ================================================== 
+      $('#memberTable tbody').on('click', '.checkNewCoupons', function() {
+        console.log("checkNewCoupons is clicked");
+
+        var data = memberTable.row($(this).parents('tr')).data();
+        var userPhoneNumber = data[3];
+        userName = data[0];
+        userLineId = data[6];
+        userForAddingCoupon = data[0]; // simple patch
+        
+        userPhoneNumberForUsingCoupon = data[3];
+        
+        // 尋找未參加的挑戰賽
+        var myCouponsNumbers = [];
+        couponMember.forEach(function(item, index, array) {
+          //console.log(item[1][0]);
+          var itemLength = item.length;
+          var matched = false;
+          for (var i = 0; i < itemLength; i++) {
+            //console.log(i, item[i][0]);
+            if (item[i][4] == userPhoneNumber) {
+              matched = true;
+            };
+          }
+          if (!matched) myCouponsNumbers.push(item[0]);
+        });
+
+        //console.log("aaa", myCouponsNumbers);
+
+        notInCoupons = [];
+        couponData.forEach(function(coupon, index, array) {
+          myCouponsNumbers.forEach(function(notAttended, index, array) {
+            if (notAttended == coupon[0]) {
+              //console.log("not match", attended);
+              notInCoupons.push(coupon);
+            }
+          });
+        });
+                
+        var table = $('#notUsedCouponTable').DataTable();
+        table.clear();
+        table.rows.add(notInCoupons);
+        table.draw();
+        
+        $("#可參加挑戰賽").text(userName + " - 可參加挑戰賽");
+       // console.log(userName);
+
+        $("#memberDiv").hide();
+        $("#couponDiv").show();
+
+      });
+
+      // ============ Function for memberDeleteBtn============================================= 
+      $('#memberTable tbody').on('click', '.memberDeleteBtn', function() {
+        console.log("memberDeleteBtn is clicked");
+
+        var delThisMember = confirm("確定要刪除此客戶");
+
+        if (!delThisMember) {
+          return 0;
+        }
+
+        var memberTable = $('#memberTable').DataTable();
+        var data = memberTable.row($(this).parents('tr')).data();
+        var userPhoneNumber = data[3];
+
+        console.log(userPhoneNumber);
+        
+        // 刪除客戶
+        memberData.forEach(function(member, index, array) {
+          if (member[3] == userPhoneNumber) {
+            memberData.splice(index, 1);
+          }
+        });
+
+        // 將更新新客戶寫入資料庫
+        database.ref('users/林口運動中心/客戶管理').set({
+          會員資料: JSON.stringify(memberData),
+        }, function(error) {
+          if (error) {
+            console.log("Write to database error, revert couponData back");
+            couponData.pop();
+          }
+          console.log('Write to database successful');
+        });
+
+        var memberTable = $('#memberTable').DataTable();
+        memberTable.clear().draw();
+        memberTable.rows.add(memberData);
+        memberTable.draw();
+
+      });
+
+    }
+
+    function buildUsedCouponsTable() {
+      var usedCouponsTable = $('#usedCouponsTable').DataTable({
+        data: myCouponsData,
+        order: false,
+        pageLength: 10,
+        lengthChange: false,
+        deferRender: true,
+        columns: [{ //title: 可參加挑戰賽編號
+            className: "centerCell"
+          },
+          {
+            //title: 挑戰賽內容
+          },
+          {
+            //title: "挑戰賽開始"
+            className: "centerCell"
+          },
+          {
+            //title: "挑戰賽結束"
+            className: "centerCell"
+          },                  
+          {
+            //title: "操作",
+            data: null,
+            defaultContent: "<button class = 'cancellUsageBtn to-edit' style='width: 100px'>取消參加</button> " 
+          }
+        ]
+      });
+      
+      // ============ Function for cancellUsageBtn ================================================== 
+//      $('#usedCouponsTable tbody').on('click', '.cancellUsageBtn', function() {
+//        console.log("cancellUsageBtn is clicked");
+//                
+//        var usedCouponsTable = $('#usedCouponsTable').DataTable();
+//        var data = usedCouponsTable.row($(this).parents('tr')).data();
+//        var couponName = data[0];
+//
+//        if (data[5]=="已繳費") {
+//          alert("已經繳過費");
+//          return 0;
+//        }
+//        
+//        var makePayment = confirm("確定已繳費");
+//        if (!makePayment) {
+//          return 0;
+//        }
+//        
+//        //更新繳費狀況
+//        console.log("進行繳費");
+//        
+//        //更新表格
+//        data[5] = "已繳費";       
+//        var memberTable = $('#usedCouponsTable').DataTable();
+//        memberTable.clear().draw();
+//        memberTable.rows.add(myCouponsData);
+//        memberTable.draw();        
+//        
+//        //更新 couponMember
+//        couponMember.forEach(function(item, index, array) {
+//          //console.log(item[0], couponName);
+//          if (item[0]==couponName){
+//            var itemLength = item.length;
+//            for (var i = 0; i < itemLength; i++) {
+//              //console.log(i, item[i][0]);
+//              if (item[i][0] == userName) {
+//                item[i][1]="已繳費"; // 修改的是 couponMember
+//              };
+//            };
+//          }
+//        });
+        
+        //更新 couponMember to 資料庫                   
+//          database.ref('users/林口運動中心/挑戰賽管理').set({
+//            挑戰賽會員: JSON.stringify(couponMember),
+//          }, function(error){
+//                if (error) {
+//                  //console.log(error);
+//                  return 0;
+//                }
+//                  console.log('Write to database successful');
+//          });          
+//      });   
+      
+      // ============ Function for cancellUsageBtn ================================================== 
+      $('#usedCouponsTable tbody').on('click', '.cancellUsageBtn', function() {
+        console.log("cancellUsageBtn is clicked");
+        
+        var usedCouponsTable = $('#usedCouponsTable').DataTable();
+        var data = usedCouponsTable.row($(this).parents('tr')).data();
+        var couponName = data[0];
+        var couponIdx = -1;
+        var alreadyInUse = false;
+        
+        // 檢查是否已報過名
+        couponMember.forEach(function(coupon, index, array){
+          if (coupon[0]==couponName) {
+            for (var i=0; i< coupon.length; i++) {
+              //console.log(coupon[i][0]);
+              if (coupon[i][4]==userPhoneNumberForCancelCoupon) {
+                //alert("已經參加過了");
+                console.log(couponMember[index][i]);
+                alreadyInUse = true;
+                couponMember[index].splice(i, 1);
+                //return(0); //只跳出 forEach 迴圈
+              }
+            };
+          }
+        })
+        
+        var thisI=0;
+        for (var i=0; i<myCouponsData.length; i++) {
+          if (myCouponsData[i][0]==couponName) {
+            thisI = i; 
+            break;
+          }
+        }
+
+        myCouponsData.splice(thisI,1);
+        // redraw table
+        usedCouponsTable.clear();
+        usedCouponsTable.rows.add(myCouponsData);
+        usedCouponsTable.draw();
+                   
+        if(alreadyInUse) {
+          console.log("aaa");
+          closeMyCoupons();
+          database.ref('users/林口運動中心/挑戰賽管理').set({
+            挑戰賽會員: JSON.stringify(couponMember),
+          }, function(error){
+                if (error) {
+                  //console.log(error);
+                  return 0;
+                }
+                  console.log('Write to database successful');
+                  location.reload();
+          });          
+        }
+        
+
+      });      
+
+      $("#usedCouponsTable_filter").css("font-family", "Noto Sans TC");
+      $("#usedCouponsTable_info").css("font-family", "Noto Sans TC");
+      $("#usedCouponsTable_paginate").css("font-family", "Noto Sans TC");
+
+      var myCouponsHistory = $('#myCouponsHistory').DataTable({
+        data: myCouponsHistory,
+        order: false,
+        pageLength: 10,
+        lengthChange: false,
+        deferRender: true,
+        columns: [{ //title: 歷史挑戰賽
+            className: "centerCell"
+          },
+          {
+            //title: 挑戰賽名稱
+          },
+          {
+            //title: "挑戰賽開始"
+            className: "centerCell"
+          },
+          {
+            //title: "挑戰賽結束"
+            className: "centerCell"
+          },
+          {
+            //title: "操作",
+            data: null,
+            defaultContent: "<button class = 'checkUsedCoupons to-remark' style='width: 100px'>&nbsp</button> "
+          }
+        ]
+      });
+      
+      //location.reload();
+      
+      $("#myCouponsHistory_filter").css("font-family", "Noto Sans TC");
+      $("#myCouponsHistory_info").css("font-family", "Noto Sans TC");
+      $("#myCouponsHistory_paginate").css("font-family", "Noto Sans TC");
+    }
+
+    function buildCouponsTable() {       
+      $("#couponDiv").show();
+      var couponsTable = $('#notUsedCouponTable').DataTable({
+        data: notInCoupons, //couponData,
+        //order: false,
+        pageLength: 10,
+        lengthChange: false,
+        deferRender: true,
+        columns: [{ //title: 可參加挑戰賽編號
+            className: "centerCell"
+          },
+          {
+            //title: 挑戰賽內容
+          },
+
+          {
+            //title: "挑戰賽開始"
+            className: "centerCell"
+          },
+          {
+            //title: "挑戰賽結束"
+            className: "centerCell"
+          },
+          {
+            //title: "操作",
+            data: null,
+            defaultContent: "<button id='joinBtn' class = 'useCouponBtn to-edit' style='width: 100px'>參加</button> "
+          }
+        ]
+      });
+      
+      $("#couponDiv").hide();
+      
+      //TODO
+      // ============ Function for useCouponBtn ================================================== 
+      $('#notUsedCouponTable tbody').on('click', '.useCouponBtn', function() {
+        console.log("useCouponBtn is clicked");
+        var couponsTable = $('#notUsedCouponTable').DataTable();
+        var data = couponsTable.row($(this).parents('tr')).data();
+        var couponName = data[0];
+        var couponIdx = -1;
+        var alreadyInUse = false;
+        // 檢查是否已報過名
+        couponMember.forEach(function(coupon, index, array){
+          if (coupon[0]==couponName) {
+            //console.log(couponName);
+  
+            // Conver local date to format "YYYY-MM-DD"
+            var nowDate = new Date();
+            var localDateStr = nowDate.toLocaleDateString();
+            var formatDateStr = localDateStr.replace(/\//g, "-");
+            var dateArr = formatDateStr.split("-");
+            if (dateArr[1].length == 1) dateArr[1]="0"+dateArr[1]; //若是個位數，前面補 0
+            if (dateArr[2].length == 1) dateArr[2]="0"+dateArr[2]; //若是個位數，前面補 0   
+            var dateStr = dateArr[0] + "-" + dateArr[1] + "-" + dateArr[2];   
+            //console.log(dateStr);
+            // End of Conver local date to format "YYYY-MM-DD"             
+                
+            couponIdx = index;
+            coupon.push([userForAddingCoupon,(dateStr + " 已參加"), "未繳費", userLineId, userPhoneNumberForUsingCoupon]);
+          }
+        }) 
+        
+        //刪除 notInCoupons 的那一列，重畫表格
+        var thisI=0;
+        for (var i=0; i<notInCoupons.length; i++) {
+          if (notInCoupons[i][0]==couponName) {
+            thisI = i; 
+            break;
+          }
+        }
+
+        notInCoupons.splice(thisI,1);        
+        // redraw table
+        couponsTable.clear();
+        couponsTable.rows.add(notInCoupons);
+        couponsTable.draw();        
+        
+        
+
+        // Write couponMember to database
+        database.ref('users/林口運動中心/挑戰賽管理').set({
+          挑戰賽會員: JSON.stringify(couponMember),
+        }, function(error){
+              if (error) {
+                //console.log(error);
+                return 0;
+              }
+                //console.log('Write to database successful');
+                //console.log("aaa", $("#joinBtn").text());
+                alert("參加成功!");
+                //closeMyCoupons();
+        });          
+     
+
+      });
+      
+      $("#notUsedCouponTable_filter").css("font-family", "Noto Sans TC");
+      $("#notUsedCouponTable_info").css("font-family", "Noto Sans TC");
+      $("#notUsedCouponTable_paginate").css("font-family", "Noto Sans TC");
+    }
+
+    function signIn() {
+      //check email
+      if (!validateEmail($("#emailAddress").val())) {
+        $("#emailAddress").val("");
+        $("#emailAddress").attr("placeholder", "Email Address Error, try again!");
+        $("#emailAddress").css("background-color", "yellow");
+      } else {
+        firebase.auth().signInWithEmailAndPassword($("#emailAddress").val(), $("#password").val()).catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          alert("Login Error! Try again!")
+        });
+      }
+
+    }
+
+    function backToMain() {
+      window.location.href = 'index.html';
+    }
+
+    function readMemberfromDB() {
+      $.loading.start('Loading data');
+      firebase.database().ref('users/林口運動中心/客戶管理').once('value').then(function(snapshot) {
+        console.log("member read done");
+        var result = snapshot.val();
+        memberData = JSON.parse(result.會員資料);
+        $.loading.end();
+        
+        // 轉換 userId，從 33字元長度 "Uaabb....ccdd" ==> 顯示 "Uaabb..ccdd"
+//        memberData.forEach(function(member, index, array){
+//          var head, tail;
+//          head=member[1].slice(0,5);
+//          tail=member[1].slice(29,33)
+//          //console.log(head+".."+tail);
+//          member[1]=head.toUpperCase()+".."+tail.toUpperCase();
+//        });        
+
+        var memberTable = $('#memberTable').DataTable();
+        memberTable.clear().draw();
+        memberTable.rows.add(memberData);
+        memberTable.draw();
+      });
+    }
+
+    function addMember() {
+      //$("#memberDiv").hide();
+      //$("#addMemberInfo").show();
+      alert("抱歉，目前只能用 LINE 新增客戶");
+    }
+
+
+    function addMemberInfo() {
+
+      var addThisMember = confirm("確定要新增此客戶");
+
+      if (!addThisMember) {
+        //        $("#addMemberInfo").hide();
+        //        $("#memberDiv").show();        
+        return 0;
+      }
+
+      var dataToAdd = [
+        $("#newMemberName").val(),
+        $("#newMemberLINEId").val(),
+        $("#newMemberGender").val(),
+        $("#newMemberBirth").val(),
+        $("#newMemberPhoneNum").val(),
+        $("#newMemberIdNum").val(),
+        $("#newMemberAssress").val(),
+      ];
+
+
+      // 更新 local couponData
+      memberData.push(dataToAdd);
+
+      // 將新客戶寫入資料庫
+// 先 Remark，避免誤寫入資料
+//      database.ref('users/林口運動中心/客戶管理').set({
+//        會員資料: JSON.stringify(memberData),
+//      }, function(error) {
+//        if (error) {
+//          console.log("Write to database error, revert couponData back");
+//          couponData.pop();
+//        }
+//        console.log('Write to database successful');
+//      });
+
+      var table = $('#memberTable').DataTable();
+      table.clear().draw();
+      table.rows.add(memberData);
+      table.draw();
+
+      $("#addMemberInfo").hide();
+      $("#memberDiv").show();
+
+    }
+
+    function closeAddMember() {
+      $("#addMemberInfo").hide();
+      $("#memberDiv").show();
+    }
+
+
+    function closeMyCoupons() {
+      console.log("close myCoupons");
+      $("#myCouponDiv").hide();
+      $("#memberDiv").show();
+    }
+    
+    function returnFromCoupons() {
+      console.log("returnFromCoupons");
+      $("#couponDiv").hide();   
+      $("#memberDiv").show();
+           
+    }
+    
+  </script>
+
+
+</body>
+
+</html>
