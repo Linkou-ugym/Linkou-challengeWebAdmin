@@ -153,7 +153,8 @@ function initMainPage() {
     console.log(data[6]);
     $("#couponFeeDetail").val(data[6]);  
     $("#coupon兌換條件Detail").val(data[7]);    
-    $("#coupon獎品數量Detail").val(data[8]);        
+    $("#coupon獎品數量Detail").val(data[8]);  
+    $("#coupon獎品餘量Detail").val(data[9]);      
 
     couponMember.forEach(function (item, index, array) {
       if (item[0] == data[0]) {

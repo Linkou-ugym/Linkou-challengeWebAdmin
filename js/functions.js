@@ -48,6 +48,7 @@ function couponConfirm() {
             $("#couponFee").val(),
             $("#coupon兌換條件").val(),      
             $("#coupon獎品數量").val(),    
+            $("#coupon獎品數量").val(),  // 獎品餘量，初始值同獎品數量     
           ];
 
   console.log(dataToAdd);
@@ -199,6 +200,7 @@ function couponUpdate() {
       $("#couponFeeDetail").val(), 
       $("#coupon兌換條件Detail").val(),  
       $("#coupon獎品數量Detail").val(),           
+      $("#coupon獎品餘量Detail").val(),         
     ];    
     
     console.log(dataToReplace);
